@@ -1,36 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <link rel="stylesheet" href="Mom_Website.css">
-  <script src="Mom_Website.js"></script>
-<title>Madhuri's Kitchen</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Name</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+        nav {
+            background-color: #444;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+        .hero-image {
+            background-image: url('restaurant-image.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ccc;
+        }
+        .footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+        }
+    </style>
 </head>
 <body>
-  
-  <div class="topnav">
-    <a class="active" href="#home">Home</a>
-    <a target ="_self" href="Mom_Website_Menu.html">Menu</a>
-    <a target ="_self" href="#contact">Contact</a>
-    <a target ="_self" href="#location">Location</a>
-    <a target ="_self" href="#about">About</a>
-    
-  <div>
-    <h1>Welcome to Madhuri's Kitchen</h1>
-  </div>  
-
-  <div class="images"></div>
-    <img src="food.jpg" alt="Curry">
-    <img src="food2.jpg" alt="Curry">
-    <img src="food3.jpg" alt="Curry">    
-  </div>
-
-  <div class="menu_image">
-    <h1 style="text-align: center;">See our Menu!</h1>
-    <a href="menu.html"> 
-      <img id="menu-pic" src="download.jpg" alt="Menu_Image">
-    </a>
-
-  </div>
-
+    <header>
+        <h1>Restaurant Name</h1>
+    </header>
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#menu">Menu</a>
+        <a href="#about">About Us</a>
+        <a href="#contact">Contact</a>
+    </nav>
+    <div class="hero-image"></div>
+    <div class="container">
+        <div class="welcome-message">
+            <h2>Welcome to Restaurant Name</h2>
+            <p>Enjoy the best dining experience with us. We serve delicious food with a smile!</p>
+        </div>
+        <section id="menu">
+            <h2>Our Menu</h2>
+            <div class="menu-item">
+                <span>Item 1</span>
+                <span>$10.99</span>
+            </div>
+            <div class="menu-item">
+                <span>Item 2</span>
+                <span>$12.99</span>
+            </div>
+            <div class="menu-item">
+                <span>Item 3</span>
+                <span>$8.99</span>
+            </div>
+            <!-- Add more menu items here -->
+        </section>
+        <section id="about">
+            <h2>About Us</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eu justo vel velit convallis iaculis.</p>
+        </section>
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>Email: info@restaurant.com</p>
+            <p>Phone: (123) 456-7890</p>
+            <p>Address: 123 Main Street, City, Country</p>
+        </section>
+    </div>
+    <footer class="footer">
+        <p>&copy; 2023 Restaurant Name. All rights reserved.</p>
+    </footer>
 </body>
 </html>
