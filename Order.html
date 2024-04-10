@@ -11,8 +11,7 @@
         <h1>Place Your Food Order</h1>
     </header>
 
-    <form id="order-form">
-
+    <form id="order-form" onsubmit="submitOrder(event)">
         <section class="order-details">
             <h2>Your Order</h2>
             <div class="order-item">
@@ -23,7 +22,6 @@
                 <label for="quantity-item2">Quantity for Item 2:</label>
                 <input type="number" name="quantity-item2" id="quantity-item2" min="0">
             </div>
-            <!-- Add more order details fields as needed (e.g., special instructions) -->
 
             <div class="delivery-info">
                 <h2>Delivery Information</h2>
@@ -35,7 +33,6 @@
                     <label for="address">Delivery Address:</label>
                     <input type="text" name="address" id="address" required>
                 </div>
-                <!-- Add more delivery information fields as needed (e.g., phone number, delivery time) -->
 
                 <div class="submit-button">
                     <button type="submit">Place Order</button>
@@ -47,5 +44,6 @@
     <footer>
         <p>&copy; 2023 Food Order App</p>
     </footer>
+
 </body>
 </html>

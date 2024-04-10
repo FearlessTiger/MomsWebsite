@@ -1,12 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <link rel="stylesheet" href="Mom_Website.css">
-  <script src="Mom_Website.js"></script>
-<title>Menu</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1101.0.min.js"></script>
 </head>
 <body>
-    <h1 style="text-align: center; font-size: 100px;">Menu</h1>>
-    <img src="menu.jpeg">
+    <h1>Restaurant Menu</h1>
+    <div id="menu"></div>
+
+    <script>
+        // Initialize the AWS SDK
+        AWS.config.update({
+            region: 'us-east-2', // Replace 'your-region' with your AWS region
+            accessKeyId: 'AKIAZI2LEHSIN7P3JYJ6', // Replace 'your-access-key-id' with your AWS access key ID
+            secretAccessKey: '5V8fREt5HofDTKj5Afb+T/PMDtgoHitkUdD95GSj' // Replace 'your-secret-access-key' with your AWS secret access key
+        });
+
+        // Create DynamoDB service object
+        var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+
+        // Function to fetch menu items from DynamoDB
+        function fetchMenuItems() {
+            var params = {
+                TableName: 'MKitchenMenu' // Replace 'your-table-name' with the name of your DynamoDB table
+            };
+
+            dynamodb.scan(params, function(err, data) {
+                if (err) {
+                    console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
+                } else {
+                    console.log("Scan succeeded.");
+                    var menuItems = data.Items;
+                    displayMenu(menuItems);
+                }
+            });
+        }
+
+        // Function to display menu items on the HTML page
+        function displayMenu(menuItems) {
+            var menuContainer = document.getElementById('menu');
+
+            menuItems.forEach(function(item) {
+                var itemName = item.itemName;
+                var itemPrices = item.itemPrices;
+
+                var itemHTML = `<div>
+                                    <h3>${itemName}</h3>
+                                    <ul>`;
+                
+                // Loop through the keys in the itemPrices object
+                for (var key in itemPrices) {
+                    itemHTML += `<li>${key}: $${itemPrices[key]}</li>`;
+                }
+                
+                    itemHTML += `</ul></div>`;
+            
+                    menuContainer.innerHTML += itemHTML;
+            });
+        }
+
+        // Fetch menu items when the page loads
+        window.onload = fetchMenuItems;
+    </script>
 </body>
 </html>
