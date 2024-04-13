@@ -46,3 +46,7 @@ nav a {
     text-align: center;
     padding: 1rem;
 }
+
+.flex-container {
+  display: flex;
+}

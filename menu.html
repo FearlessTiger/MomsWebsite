@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Menu</title>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1101.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Restaurant Menu</h1>
-    <div id="menu"></div>
+    <div class = "flex-container" id="menu">
+        <div id = "menu-item-head">Menu Item</div>
+        <div id = "menu-price-head">Menu Prices</div>
+        <div id = "menu-small-head">Small Group Price</div>
+        <div id = "menu-medium-head">Medium Group Price</div>
+        <div id = "menu-large-head">Large Group Price</div>
+    </div>
 
     <script>
         // Initialize the AWS SDK
@@ -41,25 +48,42 @@
         // Function to display menu items on the HTML page
         function displayMenu(menuItems) {
             var menuContainer = document.getElementById('menu');
+            var menuHead = document.getElementById('menu-item-head');
+            var menuPriceHead = document.getElementById('menu-price-head');
+            var menuSmallHead = document.getElementById('menu-small-head');
+            var menuMediumHead = document.getElementById('menu-medium-head');
+            var menuLargeHead = document.getElementById('menu-large-head');
 
             menuItems.forEach(function(item) {
-                var itemName = item.itemName;
-                var itemPrices = item.itemPrices;
+                var itemName = item.itemName.S;
+                var itemPrices = item.itemPrices.NS;
+                itemPriceArray = [];
+                for(var i in itemPrices){
+                    itemPriceArray.push((itemPrices[i]));
+                }
+                itemPriceArray.sort(function(a, b) {
+                    return a - b; // Compare numbers to sort in ascending order
+                });
+                console.log(itemPriceArray);
+
 
                 var itemHTML = `<div>
                                     <h3>${itemName}</h3>
                                     <ul>`;
-                
+                menuHead.innerHTML += itemHTML;
                 // Loop through the keys in the itemPrices object
-                for (var key in itemPrices) {
-                    itemHTML += `<li>${key}: $${itemPrices[key]}</li>`;
-                }
-                
-                    itemHTML += `</ul></div>`;
-            
-                    menuContainer.innerHTML += itemHTML;
-            });
-        }
+
+                menuSmallHead.innerHTML += `<div>
+                                                <h3>$${itemPriceArray[0]}</h3>
+                                                <ul>`;
+                menuMediumHead.innerHTML += `<div>
+                                                <h3>$${itemPriceArray[1]}</h3>
+                                                <ul>`;
+                menuLargeHead.innerHTML += `<div>
+                                                <h3>$${itemPriceArray[2]}</h3>
+                                                <ul>`;
+                });
+            }
 
         // Fetch menu items when the page loads
         window.onload = fetchMenuItems;
