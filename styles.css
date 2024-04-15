@@ -49,4 +49,9 @@ nav a {
 
 .flex-container {
   display: flex;
+  flex: 2;
+}
+
+.menu-item {
+  flex: 2;
 }

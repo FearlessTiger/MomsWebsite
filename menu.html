@@ -11,11 +11,13 @@
     <h1>Restaurant Menu</h1>
     <div class = "flex-container" id="menu">
         <div id = "menu-item-head">Menu Item</div>
-        <div id = "menu-price-head">Menu Prices</div>
         <div id = "menu-small-head">Small Group Price</div>
         <div id = "menu-medium-head">Medium Group Price</div>
         <div id = "menu-large-head">Large Group Price</div>
+        <input type="number" id="quantity-input" placeholder="Quantity">  
+        <div id = "selected">
     </div>
+    <button type="submit" id="submit-button" onclick="onSubmit()">Submit</button>
 
     <script>
         // Initialize the AWS SDK
@@ -64,7 +66,6 @@
                 itemPriceArray.sort(function(a, b) {
                     return a - b; // Compare numbers to sort in ascending order
                 });
-                console.log(itemPriceArray);
 
 
                 var itemHTML = `<div>
@@ -73,20 +74,45 @@
                 menuHead.innerHTML += itemHTML;
                 // Loop through the keys in the itemPrices object
 
-                menuSmallHead.innerHTML += `<div>
+                menuSmallHead.innerHTML += `<div class = "menu-item">
                                                 <h3>$${itemPriceArray[0]}</h3>
+                                                <input type="checkbox" data-name="${itemName}" data-size="small">
                                                 <ul>`;
-                menuMediumHead.innerHTML += `<div>
+                menuMediumHead.innerHTML += `<div class = "menu-item"">
                                                 <h3>$${itemPriceArray[1]}</h3>
+                                                <input type="checkbox" data-name="${itemName}" data-size="medium">
                                                 <ul>`;
-                menuLargeHead.innerHTML += `<div>
+                menuLargeHead.innerHTML += `<div class = "menu-item">
                                                 <h3>$${itemPriceArray[2]}</h3>
+                                                <input type="checkbox" data-name="${itemName}" data-size="large">
                                                 <ul>`;
                 });
             }
 
         // Fetch menu items when the page loads
         window.onload = fetchMenuItems;
+  
+        function getSelectedItems() {
+            var selectedItems = {};
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxes.forEach(function(checkbox) {
+                var itemName = checkbox.getAttribute('data-name');
+                var itemSize = checkbox.getAttribute('data-size');
+                if (!selectedItems[itemName]) {
+                    selectedItems[itemName] = [];
+                }
+                selectedItems[itemName].push(itemSize);
+            });
+            return selectedItems;
+        }
+        
+        function onSubmit() {
+            var selectedItems = getSelectedItems();
+            console.log(selectedItems);
+            // You can do further processing with the selected items here
+        }
+
+        
     </script>
 </body>
 </html>
