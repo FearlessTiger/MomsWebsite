@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bag</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1101.0.min.js"></script>
+    <style>
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .menu-item span {
+            margin: 0 10px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -19,6 +30,6 @@
         <button onclick="placeOrder()">Place Order</button>
     </footer>
 
-    <script src="bag.js"></script>
+    <script src="js/bag.js"></script>
 </body>
 </html>
