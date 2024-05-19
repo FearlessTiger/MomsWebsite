@@ -6,34 +6,61 @@
     <title>Restaurant Menu</title>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1101.0.min.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        .flex-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .menu-item-head, .menu-item {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+        .menu-item input[type="checkbox"] {
+            margin-left: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Restaurant Menu</h1>
-    <div class = "flex-container" id="menu">
-        <div id = "menu-item-head">Menu Item</div>
-        <div id = "menu-small-head">Small Group Price</div>
-        <div id = "menu-medium-head">Medium Group Price</div>
-        <div id = "menu-large-head">Large Group Price</div>
-        <input type="number" id="quantity-input" placeholder="Quantity">  
-        <div id = "selected">
+    <header>
+        <h1>Restaurant Menu</h1>
+    </header>
+    <div class="container">
+        <div class="flex-container" id="menu">
+            <div class="menu-item-head">Menu Item</div>
+            <div class="menu-item-head">Small Group Price</div>
+            <div class="menu-item-head">Medium Group Price</div>
+            <div class="menu-item-head">Large Group Price</div>
+        </div>
+        <div id="selected"></div>
+        <button type="submit" id="submit-button" onclick="onSubmit()">Submit</button>
     </div>
-    <button type="submit" id="submit-button" onclick="onSubmit()">Submit</button>
 
     <script>
         // Initialize the AWS SDK
         AWS.config.update({
-            region: 'us-east-2', // Replace 'your-region' with your AWS region
-            accessKeyId: 'AKIAZI2LEHSIN7P3JYJ6', // Replace 'your-access-key-id' with your AWS access key ID
-            secretAccessKey: '5V8fREt5HofDTKj5Afb+T/PMDtgoHitkUdD95GSj' // Replace 'your-secret-access-key' with your AWS secret access key
+            region: 'us-east-2',
+            accessKeyId: 'AKIAZI2LEHSIN7P3JYJ6',
+            secretAccessKey: '5V8fREt5HofDTKj5Afb+T/PMDtgoHitkUdD95GSj'
         });
 
         // Create DynamoDB service object
         var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-        var selectedItems = null;
+
         // Function to fetch menu items from DynamoDB
         function fetchMenuItems() {
             var params = {
-                TableName: 'MKitchenMenu' // Replace 'your-table-name' with the name of your DynamoDB table
+                TableName: 'MKitchenMenu'
             };
 
             dynamodb.scan(params, function(err, data) {
@@ -50,47 +77,25 @@
         // Function to display menu items on the HTML page
         function displayMenu(menuItems) {
             var menuContainer = document.getElementById('menu');
-            var menuHead = document.getElementById('menu-item-head');
-            var menuSmallHead = document.getElementById('menu-small-head');
-            var menuMediumHead = document.getElementById('menu-medium-head');
-            var menuLargeHead = document.getElementById('menu-large-head');
 
             menuItems.forEach(function(item) {
                 var itemName = item.itemName.S;
-                var itemPrices = item.itemPrices.NS;
-                itemPriceArray = [];
-                for(var i in itemPrices){
-                    itemPriceArray.push((itemPrices[i]));
-                }
-                itemPriceArray.sort(function(a, b) {
-                    return a - b; // Compare numbers to sort in ascending order
-                });
+                var itemPrices = item.itemPrices.NS.map(Number).sort((a, b) => a - b);
 
+                var itemHTML = `
+                    <div class="menu-item">${itemName}</div>
+                    <div class="menu-item">$${itemPrices[0]}<input type="checkbox" data-name="${itemName}" data-size="small"></div>
+                    <div class="menu-item">$${itemPrices[1]}<input type="checkbox" data-name="${itemName}" data-size="medium"></div>
+                    <div class="menu-item">$${itemPrices[2]}<input type="checkbox" data-name="${itemName}" data-size="large"></div>
+                `;
 
-                var itemHTML = `<div>
-                                    <h3>${itemName}</h3>
-                                    <ul>`;
-                menuHead.innerHTML += itemHTML;
-                // Loop through the keys in the itemPrices object
-
-                menuSmallHead.innerHTML += `<div class = "menu-item">
-                                                <h3>$${itemPriceArray[0]}</h3>
-                                                <input type="checkbox" data-name="${itemName}" data-size="small">
-                                                <ul>`;
-                menuMediumHead.innerHTML += `<div class = "menu-item"">
-                                                <h3>$${itemPriceArray[1]}</h3>
-                                                <input type="checkbox" data-name="${itemName}" data-size="medium">
-                                                <ul>`;
-                menuLargeHead.innerHTML += `<div class = "menu-item">
-                                                <h3>$${itemPriceArray[2]}</h3>
-                                                <input type="checkbox" data-name="${itemName}" data-size="large">
-                                                <ul>`;
-                });
-            }
+                menuContainer.innerHTML += itemHTML;
+            });
+        }
 
         // Fetch menu items when the page loads
         window.onload = fetchMenuItems;
-  
+
         function getSelectedItems() {
             var selectedItems = {};
             var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
@@ -104,15 +109,13 @@
             });
             return selectedItems;
         }
-        
+
         function onSubmit() {
-            selectedItems = getSelectedItems();
+            var selectedItems = getSelectedItems();
             console.log(selectedItems);
             localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
             window.location.href = 'bag.html';
         }
-
-        
     </script>
 </body>
 </html>
