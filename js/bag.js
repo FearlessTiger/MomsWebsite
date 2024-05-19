@@ -1,48 +1,34 @@
-AWS.config.update({
-    region: 'us-east-2',
-    accessKeyId: 'AKIAZI2LEHSIN7P3JYJ6',
-    secretAccessKey: '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'
-});
-var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-
-var selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
-
+// frontend/script.js
 document.addEventListener('DOMContentLoaded', async function() {
+    const selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
     await displayItems(selectedItems);
 });
 
-function getItemPrice(itemName, itemSize) {
-    return new Promise((resolve, reject) => {
-        var params = {
-            TableName: 'MKitchenMenu'
-        };
+async function fetchMenuItems() {
+    try {
+        const response = await fetch('http://localhost:3000/menu-items');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching menu items:', error);
+    }
+}
 
-        dynamodb.scan(params, function(err, data) {
-            if (err) {
-                console.error("Unable to get item price. Error JSON:", JSON.stringify(err, null, 2));
-                reject(err);
-            } else {
-                var price;
-                var menuItems = data.Items;
-                menuItems.forEach(function(item) {
-                    if (item.itemName.S == itemName) {
-                        var itemPrices = item.itemPrices.NS;
-                        var itemPriceArray = itemPrices.map(Number).sort((a, b) => a - b);
-
-                        if (itemSize.toString() == "small") {
-                            price = itemPriceArray[0];
-                        } else if (itemSize.toString() == "medium") {
-                            price = itemPriceArray[1];
-                        } else if (itemSize.toString() == "large") {
-                            price = itemPriceArray[2];
-                        }
-                    }
-                });
-                console.log(price);
-                resolve(price);
+async function getItemPrice(itemName, itemSize) {
+    const menuItems = await fetchMenuItems();
+    let price;
+    menuItems.forEach(item => {
+        if (item.itemName.S === itemName) {
+            const itemPrices = item.itemPrices.NS.map(Number).sort((a, b) => a - b);
+            if (itemSize === "small") {
+                price = itemPrices[0];
+            } else if (itemSize === "medium") {
+                price = itemPrices[1];
+            } else if (itemSize === "large") {
+                price = itemPrices[2];
             }
-        });
+        }
     });
+    return price;
 }
 
 async function displayItems(items) {
@@ -77,24 +63,29 @@ async function displayItems(items) {
 }
 
 function placeOrder() {
-    let date = new Date().toLocaleDateString();
-    Object.entries(selectedItems).forEach(function([key, value]) {
-        var params = {
-            TableName: 'MKitchenOrders',
-            Item: {
-                'itemName': {S: key},
-                'creationDate': {S: date},
-                'itemSize': {S: value.toString()},
-                'itemQuantity': {S: value.toString()}
-            }
+    const selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
+    const date = new Date().toLocaleDateString();
+    const orders = Object.entries(selectedItems).map(([key, value]) => ({
+        TableName: 'MKitchenOrders',
+        Item: {
+            itemName: { S: key },
+            creationDate: { S: date },
+            itemSize: { S: value[0] },
+            itemQuantity: { S: value[1].toString() }
         }
-        dynamodb.putItem(params, function(err, data) {
-            if (err) {
-                console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-            } else {
-                console.log("Item added:", JSON.stringify(data, null, 2));
-            }
-        });
+    }));
+
+    orders.forEach(order => {
+        fetch('http://localhost:3000/place-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(order)
+        })
+        .then(response => response.json())
+        .then(data => console.log('Order placed:', data))
+        .catch(error => console.error('Error placing order:', error));
     });
 
     alert('Order placed successfully!');
