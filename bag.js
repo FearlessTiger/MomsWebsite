@@ -1,4 +1,3 @@
-// frontend/script.js
 document.addEventListener('DOMContentLoaded', async function() {
     const selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
     await displayItems(selectedItems);
@@ -62,31 +61,45 @@ async function displayItems(items) {
     });
 }
 
-function placeOrder() {
+async function placeOrder() {
     const selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
     const date = new Date().toLocaleDateString();
-    const orders = Object.entries(selectedItems).map(([key, value]) => ({
-        TableName: 'MKitchenOrders',
-        Item: {
-            itemName: { S: key },
-            creationDate: { S: date },
-            itemSize: { S: value[0] },
-            itemQuantity: { S: value[1].toString() }
-        }
-    }));
+    const orders = {};
 
-    orders.forEach(order => {
-        fetch('http://localhost:3000/place-order', {
+    Object.entries(selectedItems).forEach(([key, value]) => {
+        if (Array.isArray(value) && value.length === 2) {
+            const [size, quantity] = value;
+            orders[key] = {
+                creationDate: date,
+                itemSize: size,
+                itemQuantity: quantity.toString()
+            };
+        } else {
+            console.error(`Invalid value for item ${key}:`, value);
+        }
+        console.log(orders);
+    });
+
+    try {
+        const response = await fetch('http://localhost:3000/place-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(order)
-        })
-        .then(response => response.json())
-        .then(data => console.log('Order placed:', data))
-        .catch(error => console.error('Error placing order:', error));
-    });
+            body: JSON.stringify({ orders })
+        });
 
-    alert('Order placed successfully!');
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log('Order placed:', data);
+            alert('Order placed successfully!');
+        } else {
+            console.error('Error placing order:', data.error);
+            alert(`Error placing order: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error placing order:', error);
+        alert('Error placing order, please try again.');
+    }
 }

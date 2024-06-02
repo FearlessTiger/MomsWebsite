@@ -15,31 +15,45 @@ AWS.config.update({
 
 const dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
 
-app.get('/menu-items', (req, res) => {
+// Route to fetch menu items
+app.get('/menu-items', async (req, res) => {
     const params = {
         TableName: 'MKitchenMenu'
     };
 
-    dynamodb.scan(params, function(err, data) {
-        if (err) {
-            res.status(500).send("Error fetching data from DynamoDB");
-        } else {
-            res.json(data.Items);
-        }
-    });
+    try {
+        const data = await dynamodb.scan(params).promise();
+        res.json(data.Items);
+    } catch (err) {
+        console.error("Error fetching menu items:", err);
+        res.status(500).json({ error: "Error fetching menu items" });
+    }
 });
 
-app.post('/place-order', (req, res) => {
-    const { TableName, Item } = req.body;
-    const params = { TableName, Item };
+// Route to place order
+app.post('/place-order', async (req, res) => {
+    const { orders } = req.body;
 
-    dynamodb.putItem(params, function(err, data) {
-        if (err) {
-            res.status(500).send("Error placing order");
-        } else {
-            res.json({ message: "Order placed successfully", data });
-        }
+    const promises = Object.entries(orders).map(([key, order]) => {
+        const params = {
+            TableName: 'MKitchenOrders',
+            Item: AWS.DynamoDB.Converter.marshall({
+                itemName: {S: key},
+                creationDate: {S: order.creationDate},
+                itemSize: {S: order.itemSize},
+                itemQuantity: {N: order.itemQuantity}
+            })
+        };
+        return dynamodb.putItem(params).promise();
     });
+
+    try {
+        await Promise.all(promises);
+        res.json({ message: "Orders placed successfully" });
+    } catch (err) {
+        console.error("Error placing orders:", err);
+        res.status(500).json({ error: "Error placing orders", details: err.message });
+    }
 });
 
 app.listen(3000, () => {
