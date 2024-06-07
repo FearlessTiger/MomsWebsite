@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Menu</title>
-    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1101.0.min.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -47,34 +46,16 @@
     </div>
 
     <script>
-        // Initialize the AWS SDK
-        AWS.config.update({
-            region: 'us-east-2',
-            accessKeyId: 'AKIAZI2LEHSIN7P3JYJ6',
-            secretAccessKey: '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'
-        });
-
-        // Create DynamoDB service object
-        var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-
-        // Function to fetch menu items from DynamoDB
-        function fetchMenuItems() {
-            var params = {
-                TableName: 'MKitchenMenu'
-            };
-
-            dynamodb.scan(params, function(err, data) {
-                if (err) {
-                    console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
-                } else {
-                    console.log("Scan succeeded.");
-                    var menuItems = data.Items;
-                    displayMenu(menuItems);
-                }
-            });
+        async function fetchMenuItems() {
+            try {
+                const response = await fetch('http://localhost:3000/menu-items');
+                const menuItems = await response.json();
+                displayMenu(menuItems);
+            } catch (error) {
+                console.error('Error fetching menu items:', error);
+            }
         }
 
-        // Function to display menu items on the HTML page
         function displayMenu(menuItems) {
             var menuContainer = document.getElementById('menu');
 
@@ -92,9 +73,6 @@
                 menuContainer.innerHTML += itemHTML;
             });
         }
-
-        // Fetch menu items when the page loads
-        window.onload = fetchMenuItems;
 
         function getSelectedItems() {
             var selectedItems = {};
@@ -116,6 +94,8 @@
             localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
             window.location.href = 'bag.html';
         }
+
+        window.onload = fetchMenuItems;
     </script>
 </body>
 </html>
