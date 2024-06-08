@@ -28,11 +28,11 @@ declare class OpenSearch extends Service {
    */
   addDataSource(callback?: (err: AWSError, data: OpenSearch.Types.AddDataSourceResponse) => void): Request<OpenSearch.Types.AddDataSourceResponse, AWSError>;
   /**
-   * Attaches tags to an existing Amazon OpenSearch Service domain. Tags are a set of case-sensitive key-value pairs. A domain can have up to 10 tags. For more information, see Tagging Amazon OpenSearch Service domains.
+   * Attaches tags to an existing Amazon OpenSearch Service domain. Tags are a set of case-sensitive key-value pairs. A domain can have up to 10 tags. For more information, see Tagging Amazon OpenSearch Service domains. 
    */
   addTags(params: OpenSearch.Types.AddTagsRequest, callback?: (err: AWSError, data: {}) => void): Request<{}, AWSError>;
   /**
-   * Attaches tags to an existing Amazon OpenSearch Service domain. Tags are a set of case-sensitive key-value pairs. A domain can have up to 10 tags. For more information, see Tagging Amazon OpenSearch Service domains.
+   * Attaches tags to an existing Amazon OpenSearch Service domain. Tags are a set of case-sensitive key-value pairs. A domain can have up to 10 tags. For more information, see Tagging Amazon OpenSearch Service domains. 
    */
   addTags(callback?: (err: AWSError, data: {}) => void): Request<{}, AWSError>;
   /**
@@ -1321,9 +1321,14 @@ declare namespace OpenSearch {
      * A description of the data source.
      */
     Description?: DataSourceDescription;
+    /**
+     * The status of the data source.
+     */
+    Status?: DataSourceStatus;
   }
   export type DataSourceList = DataSourceDetails[];
   export type DataSourceName = string;
+  export type DataSourceStatus = "ACTIVE"|"DISABLED"|string;
   export interface DataSourceType {
     /**
      * An Amazon S3 data source.
@@ -2048,9 +2053,13 @@ declare namespace OpenSearch {
      */
     EndpointV2?: ServiceUrl;
     /**
-     * The key-value pair that exists if the OpenSearch Service domain uses VPC endpoints. Example key, value: 'vpc','vpc-endpoint-h2dsd34efgyghrtguk5gt6j2foh4.us-east-1.es.amazonaws.com'.
+     * The key-value pair that exists if the OpenSearch Service domain uses VPC endpoints. For example:    IPv4 IP addresses - 'vpc','vpc-endpoint-h2dsd34efgyghrtguk5gt6j2foh4.us-east-1.es.amazonaws.com'     Dual stack IP addresses - 'vpcv2':'vpc-endpoint-h2dsd34efgyghrtguk5gt6j2foh4.aos.us-east-1.on.aws'   
      */
     Endpoints?: EndpointsMap;
+    /**
+     * The dual stack hosted zone ID for the domain. 
+     */
+    DomainEndpointV2HostedZoneId?: HostedZoneId;
     /**
      * The status of the domain configuration. True if OpenSearch Service is processing configuration changes. False if the configuration is active.
      */
@@ -2314,6 +2323,10 @@ declare namespace OpenSearch {
      * A description of the data source.
      */
     Description?: DataSourceDescription;
+    /**
+     * The status of the data source response.
+     */
+    Status?: DataSourceStatus;
   }
   export interface GetDomainMaintenanceStatusRequest {
     /**
@@ -2423,6 +2436,7 @@ declare namespace OpenSearch {
      */
     UpgradeName?: UpgradeName;
   }
+  export type HostedZoneId = string;
   export type IPAddressType = "ipv4"|"dualstack"|string;
   export interface IPAddressTypeStatus {
     /**
@@ -3574,6 +3588,10 @@ declare namespace OpenSearch {
      * A new description of the data source.
      */
     Description?: DataSourceDescription;
+    /**
+     * The status of the data source update request.
+     */
+    Status?: DataSourceStatus;
   }
   export interface UpdateDataSourceResponse {
     /**
