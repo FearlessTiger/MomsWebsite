@@ -98,3 +98,22 @@ canvas {
     max-width: 100vw;
     max-height: 100vh;
   }
+
+.homescreenimages {
+    display: grid;
+    place-items: center;
+    align-content: center;
+  }
+
+.hidden {
+    opacity: 0;
+    transition: opacity 0.5s;
+    transform: translateX(-100%);
+    transition: all 2s;
+    filter: blur(5px);
+  }
+.show {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+  }
