@@ -89,10 +89,6 @@ function generateUUID() {
     });
 }
 
-function getOrderName() {
-    return document.getElementById('orderNameInput').value;
-}
-
 async function placeOrder() {
     console.log(Object.entries(selectedItems));
     console.log(selectedItems);
@@ -101,23 +97,22 @@ async function placeOrder() {
     const itemsArray = Object.entries(selectedItems).map(([itemName, itemSize]) => {
         // Retrieve the quantity from the corresponding input element
         const quantityInput = document.querySelector(`input[data-item-name="${itemName}"][data-item-size="${itemSize}"]`);
-        const itemQuantity = quantityInput ? quantityInput.value : 1; 
+        const itemQuantity = quantityInput ? quantityInput.value : 1; // Default to 1 if not found
 
         return {
             PutRequest: {
                 Item: {
-                    'orderId': { S: getCurrentDate() }, 
+                    'orderId': { S: getCurrentDate() }, // Unique identifier for each item
                     'itemName': { S: itemName },
                     'creationDate': { S: generateUUID() },
                     'itemSize': { S: itemSize.toString() },
-                    'itemQuantity': { N: itemQuantity.toString() }, 
-                    'orderName': { S: getOrderName() }
+                    'itemQuantity': { N: itemQuantity.toString() } // Assuming you want to store quantity as a number
                 }
             }
         };
     });
 
-    const batchSize = 25;
+    const batchSize = 25; // DynamoDB batch write limit
     for (let i = 0; i < itemsArray.length; i += batchSize) {
         const batch = itemsArray.slice(i, i + batchSize);
 
