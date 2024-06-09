@@ -46,33 +46,12 @@
         <button type="submit" id="submit-button" onclick="onSubmit()">Submit</button>
     </div>
 
-    <script>
-        // Initialize the AWS SDK
-        AWS.config.update({
-            region: 'us-east-2',
-            accessKeyId: 'AKIAZI2LEHSIN7P3JYJ6',
-            secretAccessKey: '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'
+    <script type = "module">
+        import { getMenuItems } from './js/server.js';
+        document.addEventListener('DOMContentLoaded', async () => {
+            const menuItems = await getMenuItems();
+            displayMenu(menuItems);
         });
-
-        // Create DynamoDB service object
-        var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-
-        // Function to fetch menu items from DynamoDB
-        function fetchMenuItems() {
-            var params = {
-                TableName: 'MKitchenMenu'
-            };
-
-            dynamodb.scan(params, function(err, data) {
-                if (err) {
-                    console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
-                } else {
-                    console.log("Scan succeeded.");
-                    var menuItems = data.Items;
-                    displayMenu(menuItems);
-                }
-            });
-        }
 
         // Function to display menu items on the HTML page
         function displayMenu(menuItems) {
@@ -94,8 +73,6 @@
         }
 
         // Fetch menu items when the page loads
-        window.onload = fetchMenuItems;
-
         function getSelectedItems() {
             var selectedItems = {};
             var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');

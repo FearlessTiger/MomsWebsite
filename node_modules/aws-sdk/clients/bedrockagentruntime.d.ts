@@ -13,11 +13,11 @@ declare class BedrockAgentRuntime extends Service {
   constructor(options?: BedrockAgentRuntime.Types.ClientConfiguration)
   config: Config & BedrockAgentRuntime.Types.ClientConfiguration;
   /**
-   * Sends a prompt for the agent to process and respond to.  The CLI doesn't support InvokeAgent.    To continue the same conversation with an agent, use the same sessionId value in the request.   To activate trace enablement, turn enableTrace to true. Trace enablement helps you follow the agent's reasoning process that led it to the information it processed, the actions it took, and the final result it yielded. For more information, see Trace enablement.   End a conversation by setting endSession to true.   Include attributes for the session or prompt in the sessionState object.   The response is returned in the bytes field of the chunk object.   The attribution object contains citations for parts of the response.   If you set enableTrace to true in the request, you can trace the agent's steps and reasoning process that led it to the response.   Errors are also surfaced in the response.  
+   *  The CLI doesn't support InvokeAgent.  Sends a prompt for the agent to process and respond to. Note the following fields for the request:   To continue the same conversation with an agent, use the same sessionId value in the request.   To activate trace enablement, turn enableTrace to true. Trace enablement helps you follow the agent's reasoning process that led it to the information it processed, the actions it took, and the final result it yielded. For more information, see Trace enablement.   End a conversation by setting endSession to true.   In the sessionState object, you can include attributes for the session or prompt or, if you configured an action group to return control, results from invocation of the action group.   The response is returned in the bytes field of the chunk object.   The attribution object contains citations for parts of the response.   If you set enableTrace to true in the request, you can trace the agent's steps and reasoning process that led it to the response.   If the action predicted was configured to return control, the response returns parameters for the action, elicited from the user, in the returnControl field.   Errors are also surfaced in the response.  
    */
   invokeAgent(params: BedrockAgentRuntime.Types.InvokeAgentRequest, callback?: (err: AWSError, data: BedrockAgentRuntime.Types.InvokeAgentResponse) => void): Request<BedrockAgentRuntime.Types.InvokeAgentResponse, AWSError>;
   /**
-   * Sends a prompt for the agent to process and respond to.  The CLI doesn't support InvokeAgent.    To continue the same conversation with an agent, use the same sessionId value in the request.   To activate trace enablement, turn enableTrace to true. Trace enablement helps you follow the agent's reasoning process that led it to the information it processed, the actions it took, and the final result it yielded. For more information, see Trace enablement.   End a conversation by setting endSession to true.   Include attributes for the session or prompt in the sessionState object.   The response is returned in the bytes field of the chunk object.   The attribution object contains citations for parts of the response.   If you set enableTrace to true in the request, you can trace the agent's steps and reasoning process that led it to the response.   Errors are also surfaced in the response.  
+   *  The CLI doesn't support InvokeAgent.  Sends a prompt for the agent to process and respond to. Note the following fields for the request:   To continue the same conversation with an agent, use the same sessionId value in the request.   To activate trace enablement, turn enableTrace to true. Trace enablement helps you follow the agent's reasoning process that led it to the information it processed, the actions it took, and the final result it yielded. For more information, see Trace enablement.   End a conversation by setting endSession to true.   In the sessionState object, you can include attributes for the session or prompt or, if you configured an action group to return control, results from invocation of the action group.   The response is returned in the bytes field of the chunk object.   The attribution object contains citations for parts of the response.   If you set enableTrace to true in the request, you can trace the agent's steps and reasoning process that led it to the response.   If the action predicted was configured to return control, the response returns parameters for the action, elicited from the user, in the returnControl field.   Errors are also surfaced in the response.  
    */
   invokeAgent(callback?: (err: AWSError, data: BedrockAgentRuntime.Types.InvokeAgentResponse) => void): Request<BedrockAgentRuntime.Types.InvokeAgentResponse, AWSError>;
   /**
@@ -51,6 +51,10 @@ declare namespace BedrockAgentRuntime {
      */
     apiPath?: ApiPath;
     /**
+     * The function in the action group to call.
+     */
+    function?: Function;
+    /**
      * The parameters in the Lambda input event.
      */
     parameters?: Parameters;
@@ -71,9 +75,84 @@ declare namespace BedrockAgentRuntime {
   }
   export type ActionGroupName = string;
   export type ActionGroupOutputString = string;
+  export type AdditionalModelRequestFields = {[key: string]: AdditionalModelRequestFieldsValue};
+  export type AdditionalModelRequestFieldsKey = string;
+  export interface AdditionalModelRequestFieldsValue {
+  }
   export type AgentAliasId = string;
   export type AgentId = string;
+  export type AgentVersion = string;
+  export type ApiContentMap = {[key: string]: PropertyParameters};
+  export interface ApiInvocationInput {
+    /**
+     * The action group that the API operation belongs to.
+     */
+    actionGroup: String;
+    /**
+     * The path to the API operation.
+     */
+    apiPath?: ApiPath;
+    /**
+     * The HTTP method of the API operation.
+     */
+    httpMethod?: String;
+    /**
+     * The parameters to provide for the API request, as the agent elicited from the user.
+     */
+    parameters?: ApiParameters;
+    /**
+     * The request body to provide for the API request, as the agent elicited from the user.
+     */
+    requestBody?: ApiRequestBody;
+  }
+  export interface ApiParameter {
+    /**
+     * The name of the parameter.
+     */
+    name?: String;
+    /**
+     * The data type for the parameter.
+     */
+    type?: String;
+    /**
+     * The value of the parameter.
+     */
+    value?: String;
+  }
+  export type ApiParameters = ApiParameter[];
   export type ApiPath = string;
+  export interface ApiRequestBody {
+    /**
+     * The content of the request body. The key of the object in this field is a media type defining the format of the request body.
+     */
+    content?: ApiContentMap;
+  }
+  export interface ApiResult {
+    /**
+     * The action group that the API operation belongs to.
+     */
+    actionGroup: String;
+    /**
+     * The path to the API operation.
+     */
+    apiPath?: ApiPath;
+    /**
+     * The HTTP method for the API operation.
+     */
+    httpMethod?: String;
+    /**
+     * http status code from API execution response (for example: 200, 400, 500).
+     */
+    httpStatusCode?: Integer;
+    /**
+     * The response body from the API operation. The key of the object is the content type (currently, only TEXT is supported). The response may be returned directly or from the Lambda function.
+     */
+    responseBody?: ResponseBody;
+    /**
+     * Controls the final response state returned to end user when API/Function execution failed. When this state is FAILURE, the request would fail with dependency failure exception. When this state is REPROMPT, the API/function response will be sent to model for re-prompt
+     */
+    responseState?: ResponseState;
+  }
   export interface Attribution {
     /**
      * A list of citations and related information for a part of an agent response.
@@ -89,6 +168,21 @@ declare namespace BedrockAgentRuntime {
   }
   export type BedrockModelArn = string;
   export type Boolean = boolean;
+  export type ByteContentBlob = Buffer|Uint8Array|Blob|string;
+  export interface ByteContentDoc {
+    /**
+     * The MIME type of the document contained in the wrapper object.
+     */
+    contentType: ContentType;
+    /**
+     * The byte value of the file to upload, encoded as a Base-64 string.
+     */
+    data: ByteContentBlob;
+    /**
+     * The file name of the document contained in the wrapper object.
+     */
+    identifier: Identifier;
+  }
   export interface Citation {
     /**
      * Contains the generated response and metadata 
@@ -103,7 +197,14 @@ declare namespace BedrockAgentRuntime {
   export interface ConflictException {
     message?: NonBlankString;
   }
+  export interface ContentBody {
+    /**
+     * The body of the API response.
+     */
+    body?: String;
+  }
   export type ContentMap = {[key: string]: Parameters};
+  export type ContentType = string;
   export type CreationMode = "DEFAULT"|"OVERRIDDEN"|string;
   export interface DependencyFailedException {
     message?: NonBlankString;
@@ -113,6 +214,54 @@ declare namespace BedrockAgentRuntime {
     resourceName?: NonBlankString;
   }
   export type Double = number;
+  export interface ExternalSource {
+    /**
+     * The identifier, contentType, and data of the external source wrapper object.
+     */
+    byteContent?: ByteContentDoc;
+    /**
+     * The S3 location of the external source wrapper object.
+     */
+    s3Location?: S3ObjectDoc;
+    /**
+     * The source type of the external source wrapper object.
+     */
+    sourceType: ExternalSourceType;
+  }
+  export type ExternalSourceType = "S3"|"BYTE_CONTENT"|string;
+  export type ExternalSources = ExternalSource[];
+  export interface ExternalSourcesGenerationConfiguration {
+    /**
+     *  Additional model parameters and their corresponding values not included in the textInferenceConfig structure for an external source. Takes in custom model parameters specific to the language model being used. 
+     */
+    additionalModelRequestFields?: AdditionalModelRequestFields;
+    /**
+     * The configuration details for the guardrail.
+     */
+    guardrailConfiguration?: GuardrailConfiguration;
+    /**
+     *  Configuration settings for inference when using RetrieveAndGenerate to generate responses while using an external source.
+     */
+    inferenceConfig?: InferenceConfig;
+    /**
+     * Contain the textPromptTemplate string for the external source wrapper object.
+     */
+    promptTemplate?: PromptTemplate;
+  }
+  export interface ExternalSourcesRetrieveAndGenerateConfiguration {
+    /**
+     * The prompt used with the external source wrapper object with the retrieveAndGenerate function.
+     */
+    generationConfiguration?: ExternalSourcesGenerationConfiguration;
+    /**
+     * The modelArn used with the external source wrapper object in the retrieveAndGenerate function.
+     */
+    modelArn: BedrockModelArn;
+    /**
+     * The document used with the external source wrapper object in the retrieveAndGenerate function.
+     */
+    sources: ExternalSources;
+  }
   export type FailureReasonString = string;
   export interface FailureTrace {
     /**
@@ -144,6 +293,54 @@ declare namespace BedrockAgentRuntime {
     text?: FinalResponseString;
   }
   export type FinalResponseString = string;
+  export type Function = string;
+  export interface FunctionInvocationInput {
+    /**
+     * The action group that the function belongs to.
+     */
+    actionGroup: String;
+    /**
+     * The name of the function.
+     */
+    function?: String;
+    /**
+     * A list of parameters of the function.
+     */
+    parameters?: FunctionParameters;
+  }
+  export interface FunctionParameter {
+    /**
+     * The name of the parameter.
+     */
+    name?: String;
+    /**
+     * The data type of the parameter.
+     */
+    type?: String;
+    /**
+     * The value of the parameter.
+     */
+    value?: String;
+  }
+  export type FunctionParameters = FunctionParameter[];
+  export interface FunctionResult {
+    /**
+     * The action group that the function belongs to.
+     */
+    actionGroup: String;
+    /**
+     * The name of the function that was called.
+     */
+    function?: String;
+    /**
+     * The response from the function call using the parameters. The key of the object is the content type (currently, only TEXT is supported). The response may be returned directly or from the Lambda function.
+     */
+    responseBody?: ResponseBody;
+    /**
+     * Controls the final response state returned to end user when API/Function execution failed. When this state is FAILURE, the request would fail with dependency failure exception. When this state is REPROMPT, the API/function response will be sent to model for re-prompt
+     */
+    responseState?: ResponseState;
+  }
   export interface GeneratedResponsePart {
     /**
      * Contains metadata about a textual part of the generated response that is accompanied by a citation.
@@ -152,9 +349,210 @@ declare namespace BedrockAgentRuntime {
   }
   export interface GenerationConfiguration {
     /**
+     *  Additional model parameters and corresponding values not included in the textInferenceConfig structure for a knowledge base. This allows users to provide custom model parameters specific to the language model being used. 
+     */
+    additionalModelRequestFields?: AdditionalModelRequestFields;
+    /**
+     * The configuration details for the guardrail.
+     */
+    guardrailConfiguration?: GuardrailConfiguration;
+    /**
+     *  Configuration settings for inference when using RetrieveAndGenerate to generate responses while using a knowledge base as a source. 
+     */
+    inferenceConfig?: InferenceConfig;
+    /**
      * Contains the template for the prompt that's sent to the model for response generation.
      */
     promptTemplate?: PromptTemplate;
+  }
+  export type GuadrailAction = "INTERVENED"|"NONE"|string;
+  export type GuardrailAction = "INTERVENED"|"NONE"|string;
+  export interface GuardrailAssessment {
+    /**
+     * Content policy details of the Guardrail.
+     */
+    contentPolicy?: GuardrailContentPolicyAssessment;
+    /**
+     * Sensitive Information policy details of Guardrail.
+     */
+    sensitiveInformationPolicy?: GuardrailSensitiveInformationPolicyAssessment;
+    /**
+     * Topic policy details of the Guardrail.
+     */
+    topicPolicy?: GuardrailTopicPolicyAssessment;
+    /**
+     * Word policy details of the Guardrail.
+     */
+    wordPolicy?: GuardrailWordPolicyAssessment;
+  }
+  export type GuardrailAssessmentList = GuardrailAssessment[];
+  export interface GuardrailConfiguration {
+    /**
+     * The unique identifier for the guardrail.
+     */
+    guardrailId: GuardrailConfigurationGuardrailIdString;
+    /**
+     * The version of the guardrail.
+     */
+    guardrailVersion: GuardrailConfigurationGuardrailVersionString;
+  }
+  export type GuardrailConfigurationGuardrailIdString = string;
+  export type GuardrailConfigurationGuardrailVersionString = string;
+  export interface GuardrailContentFilter {
+    /**
+     * The action placed on the content by the Guardrail filter.
+     */
+    action?: GuardrailContentPolicyAction;
+    /**
+     * The confidence level regarding the content detected in the filter by the Guardrail.
+     */
+    confidence?: GuardrailContentFilterConfidence;
+    /**
+     * The type of content detected in the filter by the Guardrail.
+     */
+    type?: GuardrailContentFilterType;
+  }
+  export type GuardrailContentFilterConfidence = "NONE"|"LOW"|"MEDIUM"|"HIGH"|string;
+  export type GuardrailContentFilterList = GuardrailContentFilter[];
+  export type GuardrailContentFilterType = "INSULTS"|"HATE"|"SEXUAL"|"VIOLENCE"|"MISCONDUCT"|"PROMPT_ATTACK"|string;
+  export type GuardrailContentPolicyAction = "BLOCKED"|string;
+  export interface GuardrailContentPolicyAssessment {
+    /**
+     * The filter details of the policy assessment used in the Guardrails filter.
+     */
+    filters?: GuardrailContentFilterList;
+  }
+  export interface GuardrailCustomWord {
+    /**
+     * The action details for the custom word filter in the Guardrail.
+     */
+    action?: GuardrailWordPolicyAction;
+    /**
+     * The match details for the custom word filter in the Guardrail.
+     */
+    match?: String;
+  }
+  export type GuardrailCustomWordList = GuardrailCustomWord[];
+  export interface GuardrailManagedWord {
+    /**
+     * The action details for the managed word filter in the Guardrail.
+     */
+    action?: GuardrailWordPolicyAction;
+    /**
+     * The match details for the managed word filter in the Guardrail.
+     */
+    match?: String;
+    /**
+     * The type details for the managed word filter in the Guardrail.
+     */
+    type?: GuardrailManagedWordType;
+  }
+  export type GuardrailManagedWordList = GuardrailManagedWord[];
+  export type GuardrailManagedWordType = "PROFANITY"|string;
+  export interface GuardrailPiiEntityFilter {
+    /**
+     * The action of the Guardrail filter to identify and remove PII.
+     */
+    action?: GuardrailSensitiveInformationPolicyAction;
+    /**
+     * The match to settings in the Guardrail filter to identify and remove PII.
+     */
+    match?: String;
+    /**
+     * The type of PII the Guardrail filter has identified and removed.
+     */
+    type?: GuardrailPiiEntityType;
+  }
+  export type GuardrailPiiEntityFilterList = GuardrailPiiEntityFilter[];
+  export type GuardrailPiiEntityType = "ADDRESS"|"AGE"|"AWS_ACCESS_KEY"|"AWS_SECRET_KEY"|"CA_HEALTH_NUMBER"|"CA_SOCIAL_INSURANCE_NUMBER"|"CREDIT_DEBIT_CARD_CVV"|"CREDIT_DEBIT_CARD_EXPIRY"|"CREDIT_DEBIT_CARD_NUMBER"|"DRIVER_ID"|"EMAIL"|"INTERNATIONAL_BANK_ACCOUNT_NUMBER"|"IP_ADDRESS"|"LICENSE_PLATE"|"MAC_ADDRESS"|"NAME"|"PASSWORD"|"PHONE"|"PIN"|"SWIFT_CODE"|"UK_NATIONAL_HEALTH_SERVICE_NUMBER"|"UK_NATIONAL_INSURANCE_NUMBER"|"UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER"|"URL"|"USERNAME"|"US_BANK_ACCOUNT_NUMBER"|"US_BANK_ROUTING_NUMBER"|"US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER"|"US_PASSPORT_NUMBER"|"US_SOCIAL_SECURITY_NUMBER"|"VEHICLE_IDENTIFICATION_NUMBER"|string;
+  export interface GuardrailRegexFilter {
+    /**
+     * The action details for the regex filter used in the Guardrail.
+     */
+    action?: GuardrailSensitiveInformationPolicyAction;
+    /**
+     * The match details for the regex filter used in the Guardrail.
+     */
+    match?: String;
+    /**
+     * The name details for the regex filter used in the Guardrail.
+     */
+    name?: String;
+    /**
+     * The regex details for the regex filter used in the Guardrail.
+     */
+    regex?: String;
+  }
+  export type GuardrailRegexFilterList = GuardrailRegexFilter[];
+  export type GuardrailSensitiveInformationPolicyAction = "BLOCKED"|"ANONYMIZED"|string;
+  export interface GuardrailSensitiveInformationPolicyAssessment {
+    /**
+     * The details of the PII entities used in the sensitive policy assessment for the Guardrail.
+     */
+    piiEntities?: GuardrailPiiEntityFilterList;
+    /**
+     * The details of the regexes used in the sensitive policy assessment for the Guardrail.
+     */
+    regexes?: GuardrailRegexFilterList;
+  }
+  export interface GuardrailTopic {
+    /**
+     * The action details on a specific topic in the Guardrail.
+     */
+    action?: GuardrailTopicPolicyAction;
+    /**
+     * The name details on a specific topic in the Guardrail.
+     */
+    name?: String;
+    /**
+     * The type details on a specific topic in the Guardrail.
+     */
+    type?: GuardrailTopicType;
+  }
+  export type GuardrailTopicList = GuardrailTopic[];
+  export type GuardrailTopicPolicyAction = "BLOCKED"|string;
+  export interface GuardrailTopicPolicyAssessment {
+    /**
+     * The topic details of the policy assessment used in the Guardrail.
+     */
+    topics?: GuardrailTopicList;
+  }
+  export type GuardrailTopicType = "DENY"|string;
+  export interface GuardrailTrace {
+    /**
+     * The trace action details used with the Guardrail.
+     */
+    action?: GuardrailAction;
+    /**
+     * The details of the input assessments used in the Guardrail Trace.
+     */
+    inputAssessments?: GuardrailAssessmentList;
+    /**
+     * The details of the output assessments used in the Guardrail Trace.
+     */
+    outputAssessments?: GuardrailAssessmentList;
+    /**
+     * The details of the trace Id used in the Guardrail Trace.
+     */
+    traceId?: TraceId;
+  }
+  export type GuardrailWordPolicyAction = "BLOCKED"|string;
+  export interface GuardrailWordPolicyAssessment {
+    /**
+     * The custom word details for words defined in the Guardrail filter.
+     */
+    customWords?: GuardrailCustomWordList;
+    /**
+     * The managed word lists for words defined in the Guardrail filter.
+     */
+    managedWordLists?: GuardrailManagedWordList;
+  }
+  export type Identifier = string;
+  export interface InferenceConfig {
+    /**
+     *  Configuration settings specific to text generation while generating responses using RetrieveAndGenerate. 
+     */
+    textInferenceConfig?: TextInferenceConfig;
   }
   export interface InferenceConfiguration {
     /**
@@ -179,6 +577,7 @@ declare namespace BedrockAgentRuntime {
     topP?: TopP;
   }
   export type InputText = string;
+  export type Integer = number;
   export interface InternalServerException {
     message?: NonBlankString;
   }
@@ -200,6 +599,27 @@ declare namespace BedrockAgentRuntime {
      */
     traceId?: TraceId;
   }
+  export interface InvocationInputMember {
+    /**
+     * Contains information about the API operation that the agent predicts should be called.
+     */
+    apiInvocationInput?: ApiInvocationInput;
+    /**
+     * Contains information about the function that the agent predicts should be called.
+     */
+    functionInvocationInput?: FunctionInvocationInput;
+  }
+  export type InvocationInputs = InvocationInputMember[];
+  export interface InvocationResultMember {
+    /**
+     * The result from the API response from the action group invocation.
+     */
+    apiResult?: ApiResult;
+    /**
+     * The result from the function from the action group invocation.
+     */
+    functionResult?: FunctionResult;
+  }
   export type InvocationType = "ACTION_GROUP"|"KNOWLEDGE_BASE"|"FINISH"|string;
   export interface InvokeAgentRequest {
     /**
@@ -219,15 +639,15 @@ declare namespace BedrockAgentRuntime {
      */
     endSession?: Boolean;
     /**
-     * The prompt text to send the agent.
+     * The prompt text to send the agent.  If you include returnControlInvocationResults in the sessionState field, the inputText field will be ignored. 
      */
-    inputText: InputText;
+    inputText?: InputText;
     /**
      * The unique identifier of the session. Use the same value across requests to continue the same conversation.
      */
     sessionId: SessionId;
     /**
-     * Contains parameters that specify various attributes of the session. For more information, see Control session context.
+     * Contains parameters that specify various attributes of the session. For more information, see Control session context.  If you include returnControlInvocationResults in the sessionState field, the inputText field will be ignored. 
      */
     sessionState?: SessionState;
   }
@@ -330,6 +750,7 @@ declare namespace BedrockAgentRuntime {
   }
   export type KnowledgeBaseVectorSearchConfigurationNumberOfResultsInteger = number;
   export type LambdaArn = string;
+  export type MaxTokens = number;
   export type MaximumLength = number;
   export type MimeType = string;
   export interface ModelInvocationInput {
@@ -423,6 +844,7 @@ declare namespace BedrockAgentRuntime {
      */
     value?: String;
   }
+  export type ParameterList = Parameter[];
   export type Parameters = Parameter[];
   export type PartBody = Buffer|Uint8Array|Blob|string;
   export interface PayloadPart {
@@ -500,6 +922,14 @@ declare namespace BedrockAgentRuntime {
   }
   export type PromptText = string;
   export type PromptType = "PRE_PROCESSING"|"ORCHESTRATION"|"KNOWLEDGE_BASE_RESPONSE_GENERATION"|"POST_PROCESSING"|string;
+  export interface PropertyParameters {
+    /**
+     * A list of parameters in the request body.
+     */
+    properties?: ParameterList;
+  }
+  export type RAGStopSequences = RAGStopSequencesMemberString[];
+  export type RAGStopSequencesMemberString = string;
   export interface Rationale {
     /**
      * The reasoning or thought process of the agent, based on the input.
@@ -530,52 +960,62 @@ declare namespace BedrockAgentRuntime {
   export interface ResourceNotFoundException {
     message?: NonBlankString;
   }
-  export type ResponseStream = EventStream<{accessDeniedException?:AccessDeniedException,badGatewayException?:BadGatewayException,chunk?:PayloadPart,conflictException?:ConflictException,dependencyFailedException?:DependencyFailedException,internalServerException?:InternalServerException,resourceNotFoundException?:ResourceNotFoundException,serviceQuotaExceededException?:ServiceQuotaExceededException,throttlingException?:ThrottlingException,trace?:TracePart,validationException?:ValidationException}>;
+  export type ResponseBody = {[key: string]: ContentBody};
+  export type ResponseState = "FAILURE"|"REPROMPT"|string;
+  export type ResponseStream = EventStream<{accessDeniedException?:AccessDeniedException,badGatewayException?:BadGatewayException,chunk?:PayloadPart,conflictException?:ConflictException,dependencyFailedException?:DependencyFailedException,internalServerException?:InternalServerException,resourceNotFoundException?:ResourceNotFoundException,returnControl?:ReturnControlPayload,serviceQuotaExceededException?:ServiceQuotaExceededException,throttlingException?:ThrottlingException,trace?:TracePart,validationException?:ValidationException}>;
   export interface RetrievalFilter {
     /**
-     * Knowledge base data sources whose metadata attributes fulfill all the filter conditions inside this list are returned.
+     * Knowledge base data sources are returned if their metadata attributes fulfill all the filter conditions inside this list.
      */
     andAll?: RetrievalFilterList;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value matches the value in this object are returned.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value matches the value in this object. The following example would return data sources with an animal attribute whose value is cat:  "equals": { "key": "animal", "value": "cat" } 
      */
     equals?: FilterAttribute;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value is greater than the value in this object are returned.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value is greater than the value in this object. The following example would return data sources with an year attribute whose value is greater than 1989:  "greaterThan": { "key": "year", "value": 1989 } 
      */
     greaterThan?: FilterAttribute;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value is greater than or equal to the value in this object are returned.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value is greater than or equal to the value in this object. The following example would return data sources with an year attribute whose value is greater than or equal to 1989:  "greaterThanOrEquals": { "key": "year", "value": 1989 } 
      */
     greaterThanOrEquals?: FilterAttribute;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value is in the list specified in the value in this object are returned.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value is in the list specified in the value in this object. The following example would return data sources with an animal attribute that is either cat or dog:  "in": { "key": "animal", "value": ["cat", "dog"] } 
      */
     in?: FilterAttribute;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value is less than the value in this object are returned.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value is less than the value in this object. The following example would return data sources with an year attribute whose value is less than to 1989.  "lessThan": { "key": "year", "value": 1989 } 
      */
     lessThan?: FilterAttribute;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value is less than or equal to the value in this object are returned.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value is less than or equal to the value in this object. The following example would return data sources with an year attribute whose value is less than or equal to 1989.  "lessThanOrEquals": { "key": "year", "value": 1989 } 
      */
     lessThanOrEquals?: FilterAttribute;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value doesn't match the value in this object are returned.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value is a list that contains the value as one of its members. The following example would return data sources with an animals attribute that is a list containing a cat member (for example ["dog", "cat"]).  "listContains": { "key": "animals", "value": "cat" } 
+     */
+    listContains?: FilterAttribute;
+    /**
+     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value doesn't match the value in this object are returned. The following example would return data sources that don't contain an animal attribute whose value is cat.  "notEquals": { "key": "animal", "value": "cat" } 
      */
     notEquals?: FilterAttribute;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value isn't in the list specified in the value in this object are returned.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value isn't in the list specified in the value in this object. The following example would return data sources whose animal attribute is neither cat nor dog.  "notIn": { "key": "animal", "value": ["cat", "dog"] } 
      */
     notIn?: FilterAttribute;
     /**
-     * Knowledge base data sources whose metadata attributes fulfill at least one of the filter conditions inside this list are returned.
+     * Knowledge base data sources are returned if their metadata attributes fulfill at least one of the filter conditions inside this list.
      */
     orAll?: RetrievalFilterList;
     /**
-     * Knowledge base data sources that contain a metadata attribute whose name matches the key and whose value starts with the value in this object are returned. This filter is currently only supported for Amazon OpenSearch Serverless vector stores.
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value starts with the value in this object. This filter is currently only supported for Amazon OpenSearch Serverless vector stores. The following example would return data sources with an animal attribute starts with ca (for example, cat or camel).  "startsWith": { "key": "animal", "value": "ca" } 
      */
     startsWith?: FilterAttribute;
+    /**
+     * Knowledge base data sources are returned if they contain a metadata attribute whose name matches the key and whose value is one of the following:   A string that contains the value as a substring. The following example would return data sources with an animal attribute that contains the substring at (for example cat).  "stringContains": { "key": "animal", "value": "at" }    A list with a member that contains the value as a substring. The following example would return data sources with an animals attribute that is a list containing a member that contains the substring at (for example ["dog", "cat"]).  "stringContains": { "key": "animals", "value": "at" }   
+     */
+    stringContains?: FilterAttribute;
   }
   export type RetrievalFilterList = RetrievalFilter[];
   export interface RetrievalResultContent {
@@ -606,6 +1046,10 @@ declare namespace BedrockAgentRuntime {
     uri?: String;
   }
   export interface RetrieveAndGenerateConfiguration {
+    /**
+     * The configuration used with the external source wrapper object in the retrieveAndGenerate function.
+     */
+    externalSourcesConfiguration?: ExternalSourcesRetrieveAndGenerateConfiguration;
     /**
      * Contains details about the resource being queried.
      */
@@ -652,6 +1096,10 @@ declare namespace BedrockAgentRuntime {
      */
     citations?: Citations;
     /**
+     * Specifies if there is a guardrail intervention in the response.
+     */
+    guardrailAction?: GuadrailAction;
+    /**
      * Contains the response generated from querying the knowledge base.
      */
     output: RetrieveAndGenerateOutput;
@@ -666,7 +1114,7 @@ declare namespace BedrockAgentRuntime {
      */
     kmsKeyArn: KmsKeyArn;
   }
-  export type RetrieveAndGenerateType = "KNOWLEDGE_BASE"|string;
+  export type RetrieveAndGenerateType = "KNOWLEDGE_BASE"|"EXTERNAL_SOURCES"|string;
   export interface RetrieveRequest {
     /**
      * The unique identifier of the knowledge base to query.
@@ -710,6 +1158,24 @@ declare namespace BedrockAgentRuntime {
     metadata?: RetrievalResultMetadata;
   }
   export type RetrievedReferences = RetrievedReference[];
+  export type ReturnControlInvocationResults = InvocationResultMember[];
+  export interface ReturnControlPayload {
+    /**
+     * The identifier of the action group invocation.
+     */
+    invocationId?: String;
+    /**
+     * A list of objects that contain information about the parameters and inputs that need to be sent into the API operation or function, based on what the agent determines from its session with the user.
+     */
+    invocationInputs?: InvocationInputs;
+  }
+  export interface S3ObjectDoc {
+    /**
+     * The file location of the S3 wrapper object.
+     */
+    uri: S3Uri;
+  }
+  export type S3Uri = string;
   export type SearchType = "HYBRID"|"SEMANTIC"|string;
   export interface ServiceQuotaExceededException {
     message?: NonBlankString;
@@ -718,9 +1184,17 @@ declare namespace BedrockAgentRuntime {
   export type SessionId = string;
   export interface SessionState {
     /**
+     * The identifier of the invocation of an action. This value must match the invocationId returned in the InvokeAgent response for the action whose results are provided in the returnControlInvocationResults field. For more information, see Return control to the agent developer and Control session context.
+     */
+    invocationId?: String;
+    /**
      * Contains attributes that persist across a prompt and the values of those attributes. These attributes replace the $prompt_session_attributes$ placeholder variable in the orchestration prompt template. For more information, see Prompt template placeholder variables.
      */
     promptSessionAttributes?: PromptSessionAttributesMap;
+    /**
+     * Contains information about the results from the action group invocation. For more information, see Return control to the agent developer and Control session context.  If you include this field, the inputText field will be ignored. 
+     */
+    returnControlInvocationResults?: ReturnControlInvocationResults;
     /**
      * Contains attributes that persist across a session and the values of those attributes.
      */
@@ -742,6 +1216,24 @@ declare namespace BedrockAgentRuntime {
   export type StopSequences = String[];
   export type String = string;
   export type Temperature = number;
+  export interface TextInferenceConfig {
+    /**
+     * The maximum number of tokens to generate in the output text. Do not use the minimum of 0 or the maximum of 65536. The limit values described here are arbitary values, for actual values consult the limits defined by your specific model.
+     */
+    maxTokens?: MaxTokens;
+    /**
+     * A list of sequences of characters that, if generated, will cause the model to stop generating further tokens. Do not use a minimum length of 1 or a maximum length of 1000. The limit values described here are arbitary values, for actual values consult the limits defined by your specific model.
+     */
+    stopSequences?: RAGStopSequences;
+    /**
+     *  Controls the random-ness of text generated by the language model, influencing how much the model sticks to the most predictable next words versus exploring more surprising options. A lower temperature value (e.g. 0.2 or 0.3) makes model outputs more deterministic or predictable, while a higher temperature (e.g. 0.8 or 0.9) makes the outputs more creative or unpredictable. 
+     */
+    temperature?: Temperature;
+    /**
+     *  A probability distribution threshold which controls what the model considers for the set of possible next tokens. The model will only consider the top p% of the probability distribution when generating the next token. 
+     */
+    topP?: TopP;
+  }
   export type TextPromptTemplate = string;
   export interface TextResponsePart {
     /**
@@ -763,6 +1255,10 @@ declare namespace BedrockAgentRuntime {
      * Contains information about the failure of the interaction.
      */
     failureTrace?: FailureTrace;
+    /**
+     * The trace details for a trace defined in the Guardrail filter.
+     */
+    guardrailTrace?: GuardrailTrace;
     /**
      * Details about the orchestration step, in which the agent determines the order in which actions are executed and which knowledge bases are retrieved.
      */
@@ -787,6 +1283,10 @@ declare namespace BedrockAgentRuntime {
      * The unique identifier of the agent.
      */
     agentId?: AgentId;
+    /**
+     * The version of the agent.
+     */
+    agentVersion?: AgentVersion;
     /**
      * The unique identifier of the session with the agent.
      */
