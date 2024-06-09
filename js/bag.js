@@ -140,6 +140,6 @@ async function placeOrder() {
     }
 
     alert('Order placed successfully!');
-    window.location.replace("menu.html");
+    window.location.replace("confirmation.html");
 
 }
