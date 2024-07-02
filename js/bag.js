@@ -3,6 +3,7 @@ AWS.config.update({
     accessKeyId: 'AKIAZI2LEHSIP5TGRRUK',
     secretAccessKey: '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'
 });
+
 var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
 
 var selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
@@ -115,7 +116,8 @@ async function placeOrder() {
                     'creationDate': { S: generateUUID() },
                     'itemSize': { S: itemSize.toString() },
                     'itemQuantity': { N: itemQuantity.toString() }, 
-                    'orderName': { S: getOrderName() }
+                    'orderName': { S: getOrderName() },
+                    'phoneNumber': { S: getPhoneNumber() }
                 }
             }
         };
