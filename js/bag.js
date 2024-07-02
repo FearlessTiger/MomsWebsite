@@ -1,7 +1,7 @@
 AWS.config.update({
     region: 'us-east-2',
-    accessKeyId: 'AKIAZI2LEHSIN7P3JYJ6',
-    secretAccessKey: '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'
+    accessKeyId: 'AKIAZI2LEHSIP5TGRRUK',
+    secretAccessKey: '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'
 });
 var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
 
@@ -91,6 +91,10 @@ function generateUUID() {
 
 function getOrderName() {
     return document.getElementById('orderNameInput').value;
+}
+
+function getPhoneNumber() {
+    return document.getElementById('phoneNumberInput').value;
 }
 
 async function placeOrder() {
