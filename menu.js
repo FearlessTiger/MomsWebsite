@@ -1,8 +1,52 @@
-// Initialize the AWS SDK
+// // Use this code snippet in your app.
+// // If you need more information about configurations or implementing the sample code, visit the AWS docs:
+// // https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/getting-started.html
+
+// import {
+//     SecretsManagerClient,
+//     GetSecretValueCommand,
+//   } from "@aws-sdk/client-secrets-manager";
+  
+//   const secret_name = "prod/MKitchenKey";
+  
+//   const client = new SecretsManagerClient({
+//     region: "us-east-2",
+//   });
+  
+//   let response;
+  
+//   try {
+//     response = await client.send(
+//       new GetSecretValueCommand({
+//         SecretId: secret_name,
+//         VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
+//       })
+//     );
+//   } catch (error) {
+//     // For a list of exceptions thrown, see
+//     // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+//     throw error;
+//   }
+  
+//   const secret = response.SecretString;
+    
+
+// console.log(secret);
+var secrets;
+
+
+
+var myData = JSON.parse(data);
+console.log(myData[0].accessKeyId);
+var accessKeyId = myData[0].accessKeyId;
+var secretAccessKey = myData[1].secretAccessKey;
+
+
+
 AWS.config.update({
     region: 'us-east-2',
-    accessKeyId: 'AKIAZI2LEHSIP5TGRRUK',
-    secretAccessKey: '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'
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey
 });
 
 // Create DynamoDB service object
