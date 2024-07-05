@@ -37,7 +37,6 @@ var secrets;
 
 
 var myData = JSON.parse(data);
-console.log(myData[0].accessKeyId);
 var accessKeyId = myData[0].accessKeyId;
 var secretAccessKey = myData[1].secretAccessKey;
 
@@ -111,3 +110,5 @@ function onSubmit() {
     localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
     window.location.href = 'bag.html';
 }
+
+document.getElementById('submit-button').addEventListener('click', onSubmit);

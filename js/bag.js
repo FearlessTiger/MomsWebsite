@@ -1,7 +1,13 @@
+var myData = JSON.parse(data);
+var accessKeyId = myData[0].accessKeyId;
+var secretAccessKey = myData[1].secretAccessKey;
+
+
+
 AWS.config.update({
     region: 'us-east-2',
-    accessKeyId: 'AKIAZI2LEHSIP5TGRRUK',
-    secretAccessKey: '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'
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey
 });
 
 var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
@@ -149,3 +155,5 @@ async function placeOrder() {
     window.location.replace("confirmation.html");
 
 }
+
+document.getElementById('placeOrderButton').addEventListener('click', placeOrder);
