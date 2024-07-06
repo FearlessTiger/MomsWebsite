@@ -1,49 +1,32 @@
-AWS.config.update({
-    region: 'us-east-2',
-    accessKeyId: 'AKIAZI2LEHSIP5TGRRUK',
-    secretAccessKey: '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'
-});
-
-var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
-
-var selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
-
 document.addEventListener('DOMContentLoaded', async function () {
+    const selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
     await displayItems(selectedItems);
 });
 
-function getItemPrice(itemName, itemSize) {
-    return new Promise((resolve, reject) => {
-        var params = {
-            TableName: 'MKitchenMenu'
-        };
+async function fetchMenuItems() {
+    const response = await fetch('/api/menu-items');
+    if (!response.ok) {
+        throw new Error('Failed to fetch menu items');
+    }
+    return await response.json();
+}
 
-        dynamodb.scan(params, function (err, data) {
-            if (err) {
-                console.error("Unable to get item price. Error JSON:", JSON.stringify(err, null, 2));
-                reject(err);
-            } else {
-                var price;
-                var menuItems = data.Items;
-                menuItems.forEach(function (item) {
-                    if (item.itemName.S == itemName) {
-                        var itemPrices = item.itemPrices.NS;
-                        var itemPriceArray = itemPrices.map(Number).sort((a, b) => a - b);
-
-                        if (itemSize.toString() == "small") {
-                            price = itemPriceArray[0];
-                        } else if (itemSize.toString() == "medium") {
-                            price = itemPriceArray[1];
-                        } else if (itemSize.toString() == "large") {
-                            price = itemPriceArray[2];
-                        }
-                    }
-                });
-                console.log(price);
-                resolve(price);
+async function getItemPrice(itemName, itemSize) {
+    const menuItems = await fetchMenuItems();
+    let price;
+    menuItems.forEach(item => {
+        if (item.itemName.S === itemName) {
+            const itemPrices = item.itemPrices.NS.map(Number).sort((a, b) => a - b);
+            if (itemSize === "small") {
+                price = itemPrices[0];
+            } else if (itemSize === "medium") {
+                price = itemPrices[1];
+            } else if (itemSize === "large") {
+                price = itemPrices[2];
             }
-        });
+        }
     });
+    return price;
 }
 
 async function displayItems(items) {
@@ -82,10 +65,9 @@ function getCurrentDate() {
 }
 
 function generateUUID() {
-    // Generate a simple UUID for unique identification
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0,
-            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 }
@@ -99,53 +81,32 @@ function getPhoneNumber() {
 }
 
 async function placeOrder() {
-    console.log(Object.entries(selectedItems));
-    console.log(selectedItems);
-    console.log(typeof selectedItems);
-
+    const selectedItems = JSON.parse(localStorage.getItem('selectedItems'));
     const itemsArray = Object.entries(selectedItems).map(([itemName, itemSize]) => {
-        // Retrieve the quantity from the corresponding input element
         const quantityInput = document.querySelector(`input[data-item-name="${itemName}"][data-item-size="${itemSize}"]`);
-        const itemQuantity = quantityInput ? quantityInput.value : 1; 
+        const itemQuantity = quantityInput ? quantityInput.value : 1;
 
         return {
-            PutRequest: {
-                Item: {
-                    'orderId': { S: getCurrentDate() }, 
-                    'itemName': { S: itemName },
-                    'creationDate': { S: generateUUID() },
-                    'itemSize': { S: itemSize.toString() },
-                    'itemQuantity': { N: itemQuantity.toString() }, 
-                    'orderName': { S: getOrderName() },
-                    'phoneNumber': { S: getPhoneNumber() }
-                }
-            }
+            itemName,
+            itemSize: itemSize.toString(),
+            itemQuantity: itemQuantity.toString(),
+            orderName: getOrderName(),
+            phoneNumber: getPhoneNumber()
         };
     });
 
-    const batchSize = 25;
-    for (let i = 0; i < itemsArray.length; i += batchSize) {
-        const batch = itemsArray.slice(i, i + batchSize);
+    const response = await fetch('/api/place-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ items: itemsArray })
+    });
 
-        var params = {
-            RequestItems: {
-                'MKitchenOrders': batch
-            }
-        };
-
-        dynamodb.batchWriteItem(params, function (err, data) {
-            if (err) {
-                console.error("Unable to add items. Error JSON:", JSON.stringify(err, null, 2));
-            } else {
-                console.log("Items added:", JSON.stringify(data, null, 2));
-            }
-        });
-
-        // Delay for 1000ms
-        await new Promise(resolve => setTimeout(resolve, 1000));
+    if (response.ok) {
+        alert('Order placed successfully!');
+        window.location.replace("confirmation.html");
+    } else {
+        alert('Failed to place order');
     }
-
-    alert('Order placed successfully!');
-    window.location.replace("confirmation.html");
-
 }
