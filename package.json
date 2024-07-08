@@ -1,10 +1,14 @@
 {
+  "name": "momswebsite",
+  "version": "0.0.1",
+  "description": "Moms Website for local food catering company",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "aws-sdk": "^2.1655.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
-  },  
-  "scripts": {
-    "start": "node app.js"
   }
 }
