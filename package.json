@@ -12,7 +12,14 @@
     "express": "^4.19.2"
   },
   "engines": {
-    "node": "14.x",
+    "node": "18.x",
     "npm": "6.x"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "MomsWebsite"
+  },
+  "author": "parth",
+  "license": "ISC"
 }
